@@ -1,5 +1,7 @@
 package com.springcaching.inbuildimplementation;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Component;
@@ -28,6 +30,21 @@ public class BooksService implements BooksRepository{
         simulateSlowService();
         return bookList.stream().filter(book -> book.getIsbn().equals(isbn)).
                 findFirst().get();
+
+    }
+
+    @Override
+    @CachePut(cacheNames = "books")
+    public Book updateBook(String isbn,String bookNameToUpdate) {
+        Book book1 = bookList.stream().filter(book -> book.getIsbn().equals(isbn)).findFirst().get();
+        book1.setBookName(bookNameToUpdate);
+        return book1;
+    }
+
+    @Override
+    @CacheEvict(cacheNames = "books",allEntries = true)
+    public void addNewBooks(List<Book> newBooksToAdd) {
+        bookList.addAll(newBooksToAdd);
     }
 
     private void simulateSlowService() {
